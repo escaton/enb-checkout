@@ -40,28 +40,32 @@ var api = {
 
         var promise;
         var libs = this._libraries;
-        var libNames = Object.keys(libs);
         var _this = this;
 
-        promise = Vow.all(libNames.map(function(libName) {
+        this.exec().then(function() {
+            var libNames = Object.keys(libs);
 
-            var lib = libs[libName];
-            lib.treeish = lib.treeish || "master";
+            promise = Vow.all(libNames.map(function(libName) {
 
-            return _this.getLibState(lib, libName)
-                .then(function(state) {
-                    enbTask.log(state + ' ' + libName);
-                    console.log(lib);
-                    // if (state !== "exist") {
-                    //     task.shell(commnads[state]);
-                    // } else {
+                var lib = libs[libName];
+                lib.treeish = lib.treeish || "master";
 
-                    // }
-                },
-                function(error) {
-                    task.log(error + ' ' + libName)
-                })
-        }))
+                return _this.getLibState(lib, libName)
+                    .then(function(state) {
+                        enbTask.log(state + ' ' + libName);
+                        console.log(lib);
+                        // if (state !== "exist") {
+                        //     task.shell(commnads[state]);
+                        // } else {
+
+                        // }
+                    },
+                    function(error) {
+                        enbTask.log(error + ' ' + libName)
+                    })
+            }))
+        })
+
 
         return promise;
     },
