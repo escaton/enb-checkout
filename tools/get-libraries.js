@@ -43,17 +43,12 @@ var api = inherit(moduleConfig, {
     checkoutLibraries: function(enbTask) {
 
         var _this = this;
-        this.exec();
 
         var promise;
-        var libs = this._libraries;
-        var libNames = Object.keys(libs);
+        var libs = this._libraries;this.exec().then(function() {
+            var libNames = Object.keys(libs);
 
-        promise = Vow.all(libNames.map(function(libName) {
-
-            var lib = libs[libName];
-            lib.treeish = lib.treeish || "master";
-
+            promise = Vow.all(libNames.map(function(libName) {
             return _this.getLibState(lib, libName)
                 .then(function(state) {
                     enbTask.log(state + ' ' + libName);
@@ -77,7 +72,6 @@ var api = inherit(moduleConfig, {
                     enbTask.log(error + ' ' + libName)
                 })
         }))
-
         return promise;
     },
 
