@@ -7,12 +7,16 @@
 var Vow = require('vow'),
     exec = require("child_process").exec,
     Path = require("path"),
-    fs = require("fs");
-    // inherit = require('inherit');
+    fs = require("fs"),
+    inherit = require('inherit'),
+    moduleConfig = require('../../enb/lib/config/module-config');
 
-var api = {
+var api = inherit(moduleConfig, {
 
-    _libraries: {},
+    __constructor: function() {
+        this.__base();
+        this._libraries = {};
+    },
 
     addLibraries: function(newLibraries) {
 
@@ -38,10 +42,12 @@ var api = {
 
     checkoutLibraries: function(enbTask) {
 
+        var _this = this;
+        this.exec();
+
         var promise;
         var libs = this._libraries;
         var libNames = Object.keys(libs);
-        var _this = this;
 
         promise = Vow.all(libNames.map(function(libName) {
 
@@ -51,15 +57,24 @@ var api = {
             return _this.getLibState(lib, libName)
                 .then(function(state) {
                     enbTask.log(state + ' ' + libName);
-                    console.log(lib);
-                    // if (state !== "exist") {
-                    //     task.shell(commnads[state]);
-                    // } else {
+                    // console.log(lib);
+                    if (state !== "exist") {
+                        promiseExec(
+                            commands[state]
+                                .replace(/\{lib.url\}/, lib.url)
+                                .replace(/\{lib.Name\}/, libName)
+                                .replace(/\{lib.treeish\}/, lib.treeish)
+                        ).then(function() {
 
-                    // }
+                        }, function(err) {
+                            enbTask.log(err + ' ' + libName)
+                        });
+                    } else {
+
+                    }
                 },
                 function(error) {
-                    task.log(error + ' ' + libName)
+                    enbTask.log(error + ' ' + libName)
                 })
         }))
 
@@ -100,7 +115,7 @@ var api = {
         promiseExec(cd + "git config --get remote.origin.url")
             .then(function(stdout) {
                 var remote = stdout.split("\n")[0];
-                console.log(remote)
+                console.log(remote);
                 if (remote !== url) {
                     promise.fulfill('another repository');
                     return;
@@ -123,11 +138,11 @@ var api = {
                     });
             },
             function(error) {
-                promise.reject(error)
-            })
+                promise.reject(error);
+            });
         return promise;
     }
-}
+})
 
 var promiseExec = function(cmd) {
     var promise = Vow.promise();
@@ -141,16 +156,15 @@ var promiseExec = function(cmd) {
             return;
         }
         promise.fulfill(stdout);
-    })
+    });
     return promise;
 }
 
-// var commnads = {
-//     "doesn't exist": "git clone {lib.url} libName && cd {lib.Name} && git checkout {lib.treeish}",
-//     "another branch": "cd {lib.Name} && git checkout {lib.treeish}"
-// };
-
+var commands = {
+    "doesn't exist": "git clone {lib.url} libName && cd {lib.Name} && git checkout {lib.treeish}",
+    "another branch": "cd {lib.Name} && git checkout {lib.treeish}"
+};
 
 module.exports = function(config) {
-    return config.registerModule('enb-checkout', api);
+    return config.registerModule('enb-checkout', new api());
 }
