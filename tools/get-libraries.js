@@ -11,7 +11,7 @@ var Vow = require('vow'),
     inherit = require('inherit'),
     moduleConfig = require('../../enb/lib/config/module-config');
 
-var api = inherit(moduleConfig, {
+var api = inherit(moduleConfig, {   
 
     __constructor: function() {
         this.__base();
@@ -61,9 +61,9 @@ var api = inherit(moduleConfig, {
                     if (state !== "exist") {
                         promiseExec(
                             commands[state]
-                                .replace(/\{lib.url\}/, lib.url)
-                                .replace(/\{lib.Name\}/, libName)
-                                .replace(/\{lib.treeish\}/, lib.treeish)
+                                .replace(/\{lib.url\}/g, lib.url)
+                                .replace(/\{lib.Name\}/g, libName)
+                                .replace(/\{lib.treeish\}/g, lib.treeish)
                         ).then(function() {
 
                         }, function(err) {
@@ -161,7 +161,7 @@ var promiseExec = function(cmd) {
 }
 
 var commands = {
-    "doesn't exist": "git clone {lib.url} libName && cd {lib.Name} && git checkout {lib.treeish}",
+    "doesn't exist": "git clone {lib.url} {lib.Name} && cd {lib.Name} && git checkout {lib.treeish}",
     "another branch": "cd {lib.Name} && git checkout {lib.treeish}"
 };
 
