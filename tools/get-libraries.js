@@ -59,7 +59,7 @@ var api = inherit(moduleConfig, {
                     enbTask.log(state + ' ' + libName);
                     // console.log(lib);
                     if (state !== "exist") {
-                        promiseExec(
+                        return promiseExec(
                             commands[state]
                                 .replace(/\{lib.url\}/g, lib.url)
                                 .replace(/\{lib.Name\}/g, libName)
@@ -67,7 +67,7 @@ var api = inherit(moduleConfig, {
                         ).then(function() {
 
                         }, function(err) {
-                            enbTask.log(err + ' ' + libName)
+                            // enbTask.log(err + ' ' + libName)
                         });
                     } else {
 
@@ -115,7 +115,6 @@ var api = inherit(moduleConfig, {
         promiseExec(cd + "git config --get remote.origin.url")
             .then(function(stdout) {
                 var remote = stdout.split("\n")[0];
-                console.log(remote);
                 if (remote !== url) {
                     promise.fulfill('another repository');
                     return;
